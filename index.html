@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Tra cứu Đon vị hành chính</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -54,7 +56,22 @@
         <input id="keywordInput" type="text" class="form-control mb-3" placeholder="Nhập từ khóa ..." required>
         <div id="resultArea" class="row g-3"></div>
     </div>
-    <script>
+    
+    <!-- Modal Bootstrap -->
+<div class="modal fade" id="thongTinSNModal" tabindex="-1" aria-labelledby="thongTinSNModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="thongTinSNModalLabel">Thông tin sáp nhập Chi Tiết</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Nội dung Thông Tin SN sẽ được chèn vào đây -->
+      </div>
+    </div>
+  </div>
+</div>  
+<script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
@@ -223,20 +240,6 @@ function capitalizeFirstLetter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
     </script> 
-    <!-- Modal Bootstrap -->
-<div class="modal fade" id="thongTinSNModal" tabindex="-1" aria-labelledby="thongTinSNModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="thongTinSNModalLabel">Thông tin sáp nhập Chi Tiết</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Nội dung Thông Tin SN sẽ được chèn vào đây -->
-      </div>
-    </div>
-  </div>
-</div>  
 <script>
 let dataOld =  [
 {"MaDVHC": "01","Ten": "Thành phố Hà Nội","Cap": "TINH", "CapTren": "0"},
