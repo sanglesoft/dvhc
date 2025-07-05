@@ -134,8 +134,8 @@ if ('serviceWorker' in navigator) {
                 </th>
             </tr>
             <tr>
-                <td><span class="small text-muted">Mã xã</span> <strong class="text-danger">${record.MAXA}</strong></td>
-                <td><span class="small text-muted">Mã tỉnh</span> <strong class="text-danger">${record.MATINH}</strong></td>
+                <td><span class="small text-muted">Mã xã</span><br/><strong class="text-danger">${record.MAXA}</strong></td>
+                <td><span class="small text-muted">Mã tỉnh</span><br/><strong class="text-danger">${record.MATINH}</strong></td>
             </tr>
             
         `: (record.MAXA?`
@@ -144,9 +144,9 @@ if ('serviceWorker' in navigator) {
                 <th colspan="6">${capitalizeFirstLetter(record.Ten)}</td>
             </tr>
             <tr>
-                <td colspan="2"><span class="small text-muted">Mã xã</span> ${record.MAXA}</td>
-                <td colspan="2"><span class="small text-muted">Mã huyện</span> ${record.MAHUYEN}</td>
-                <td colspan="2"><span class="small text-muted">Mã tỉnh</span> ${record.MATINH}</td>
+                <td colspan="2"><span class="small text-muted">Mã xã</span><br/>${record.MAXA}</td>
+                <td colspan="2"><span class="small text-muted">Mã huyện</span><br/>${record.MAHUYEN}</td>
+                <td colspan="2"><span class="small text-muted">Mã tỉnh</span><br/>${record.MATINH}</td>
             </tr>
             
             <tr>
@@ -169,8 +169,8 @@ if ('serviceWorker' in navigator) {
 </button></th>
             </tr>
             <tr>
-                <td colspan="3"><span class="small text-muted">Mã xã</span> <strong class="text-danger">${record.ThongTinSauSN ? record.ThongTinSauSN.MaXa : ''}</strong></td>
-                <td colspan="3"><span class="small text-muted">Mã tỉnh</span> <strong class="text-danger">${record.ThongTinSauSN ? record.ThongTinSauSN.MaTinh : ''}</strong></td>
+                <td colspan="3"><span class="small text-muted">Mã xã</span><br/><strong class="text-danger">${record.ThongTinSauSN ? record.ThongTinSauSN.MaXa : ''}</strong></td>
+                <td colspan="3"><span class="small text-muted">Mã tỉnh</span><br/><strong class="text-danger">${record.ThongTinSauSN ? record.ThongTinSauSN.MaTinh : ''}</strong></td>
             </tr>
         `:`
             <tr>
@@ -192,8 +192,8 @@ if ('serviceWorker' in navigator) {
 </button></td>
             </tr>
             <tr>
-                <td class=""><span class="small text-muted">Mã huyện</span> ${record.MAHUYEN}</td>
-                <td class=""><span class="small text-muted">Mã tỉnh</span> ${record.MATINH}</td>
+                <td class=""><span class="small text-muted">Mã huyện</span><br/>${record.MAHUYEN}</td>
+                <td class=""><span class="small text-muted">Mã tỉnh</span><br/>${record.MATINH}</td>
             </tr>
             <tr>
                 <th style="vertical-align: middle;">Sau sáp nhập</th>
