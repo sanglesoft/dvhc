@@ -289,11 +289,12 @@
             }
 
             function timThongTinSN(record, mergeRecord) {
-                let thongTinSN = [];
+                const thongTinSN = [];
                 const tenParts = record.Ten.split(',').map(part => part.trim());
                 const tenTruoc = tenParts[0];
                 const tenSau = tenParts[tenParts.length - 1];
                 const tenGiua = tenParts.length >= 3 ? tenParts[1] : '';
+
                 if (mergeRecord) {
                     thongTinSN.push(
                         mergeRecord.ThongTin[0] || '',
@@ -301,29 +302,33 @@
                         mergeRecord.ThongTin[2] || ''
                     );
 
-                    const isCapTinh = record.MATINH !== '' && record.MAXA === '' && record.MAHUYEN === '';
-
+                    const isCapTinh = record.MATINH && !record.MAHUYEN && !record.MAXA;
                     if (!isCapTinh) {
-                        const tenTruocProcessed = loaiBoTienToTenCapDuoi(loaiBoTienToTen(tenTruoc));
+                        const conds = [];
+                        const tenTruocProcessed = loaiBoTienToTen(tenTruoc);
+                        const tenTruocNoPrefixProcessed = loaiBoTienToTenCapDuoi(tenTruocProcessed);
                         const tenGiuaProcessed = loaiBoTienToTenCapDuoi(loaiBoTienToTen(tenGiua));
 
-                        let thongTinPhu = [];
-
+                        // Ưu tiên tìm đủ cấp xã
                         if (record.MAXA && record.MAHUYEN && record.MATINH) {
-                            thongTinPhu = mergeRecord.ThongTin.filter(info =>
-                                info.toLowerCase().includes(tenTruocProcessed.toLowerCase()) &&
-                                info.toLowerCase().includes(tenGiuaProcessed.toLowerCase())
+                            conds.push(
+                                info => info.toLowerCase().includes(tenTruocProcessed.toLowerCase()) &&
+                                    info.toLowerCase().includes(tenGiuaProcessed.toLowerCase()),
+                                info => info.toLowerCase().includes(tenTruocNoPrefixProcessed.toLowerCase()) &&
+                                    info.toLowerCase().includes(tenGiuaProcessed.toLowerCase())
                             );
+                        }
 
-                            if (thongTinPhu.length === 0) {
-                                thongTinPhu = mergeRecord.ThongTin.filter(info =>
-                                    info.toLowerCase().includes(tenTruocProcessed.toLowerCase())
-                                );
-                            }
-                        } else {
-                            thongTinPhu = mergeRecord.ThongTin.filter(info =>
-                                info.toLowerCase().includes(tenTruocProcessed.toLowerCase())
-                            );
+                        // Tìm cấp xã hoặc huyện
+                        conds.push(
+                            info => info.toLowerCase().includes(tenTruocProcessed.toLowerCase()),
+                            info => info.toLowerCase().includes(tenTruocNoPrefixProcessed.toLowerCase())
+                        );
+
+                        let thongTinPhu = [];
+                        for (const cond of conds) {
+                            thongTinPhu = mergeRecord.ThongTin.filter(cond);
+                            if (thongTinPhu.length >= 1) break;
                         }
 
                         thongTinSN.push(...thongTinPhu);
@@ -367,7 +372,6 @@
                     const tenDayDuMoi = `${tenXaMoi}, ${tenTinhMoi}`;
 
                     const tuKhoaParts = chuanHoaTuKhoaTimKiem(tenDayDuMoi);
-
                     const xaMoiRecord = dataNew.find(item => {
                         const tenDayDu = layTenVaMa(item, maMapNew).Ten.normalize('NFC').toLowerCase();
                         return tuKhoaParts.every(part =>
