@@ -246,13 +246,27 @@
         function loaiBoTienToTenCapDuoi(t) {
             return t.replace(/^(Xã|Phường|Thị Trấn|Thị trấn|TT|Quận|Huyện|Thành phố)\s+/i, '').trim();
         }
-
+        function removeDiacritics(str) {
+            return str.normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d")
+                .replace(/Đ/g, "D");
+        }
         function chuanHoaTuKhoaTimKiem(keyword) {
             const parts = keyword.split(',').slice(-3).map(part => part.trim()).filter(p => p !== '');
             return parts.map(part => {
                 part = part.normalize('NFC');
                 part = loaiBoTienToTen(part);
                 part = loaiBoTienToTenCapDuoi(part);
+                return part;
+            });
+        }
+        function chuanHoaTuKhoaTimKiemKhongLoaiBo(keyword) {
+            const parts = keyword.split(',').slice(-3).map(part => part.trim()).filter(p => p !== '');
+            return parts.map(part => {
+                part = part.normalize('NFC');
+                part = loaiBoTienToTen(part);
+                //part = loaiBoTienToTenCapDuoi(part);
                 return part;
             });
         }
@@ -331,13 +345,27 @@
                             if (thongTinPhu.length >= 1) break;
                         }
 
+                        // Cuối cùng, thử bỏ dấu
+                        if (thongTinPhu.length === 0) {
+                            thongTinPhu = mergeRecord.ThongTin.filter(info =>
+                                removeDiacritics(info.toLowerCase())
+                                    .includes(removeDiacritics(tenTruocProcessed.toLowerCase()))
+                            );
+                        }
+                        if (thongTinPhu.length === 0) {
+                            thongTinPhu = mergeRecord.ThongTin.filter(info =>
+                                removeDiacritics(info.toLowerCase())
+                                    .includes(removeDiacritics(tenTruocNoPrefixProcessed.toLowerCase()))
+                            );
+                        }
+
+
                         thongTinSN.push(...thongTinPhu);
                     }
                 }
 
                 return thongTinSN;
             }
-
             function timMergeRecord(tenSauProcessed, record) {
                 let mergeRecord = null;
 
@@ -345,6 +373,12 @@
                     mergeRecord = dataMerge.find(item =>
                         item.Tinh.toLowerCase().includes(tenSauProcessed.toLowerCase())
                     );
+                    if (!mergeRecord) {
+
+                        mergeRecord = dataMerge.find(item =>
+                            removeDiacritics(item.Tinh).toLowerCase().includes(removeDiacritics(tenSauProcessed).toLowerCase())
+                        );
+                    }
                 } else {
                     mergeRecord = dataMerge.find(item =>
                         item.TinhSN.some(tinh =>
@@ -354,6 +388,22 @@
                     if (!mergeRecord) {
                         mergeRecord = dataMerge.find(item =>
                             item.Tinh.toLowerCase().includes(tenSauProcessed.toLowerCase())
+                        );
+                    }
+
+
+                    if (!mergeRecord) {
+
+                        mergeRecord = dataMerge.find(item =>
+                            item.TinhSN.some(tinh =>
+                                removeDiacritics(tinh).toLowerCase().includes(removeDiacritics(tenSauProcessed).toLowerCase())
+                            )
+                        );
+                    }
+
+                    if (!mergeRecord) {
+                        mergeRecord = dataMerge.find(item =>
+                            removeDiacritics(item.Tinh).toLowerCase().includes(removeDiacritics(tenSauProcessed).toLowerCase())
                         );
                     }
                 }
@@ -391,10 +441,11 @@
                     const tuKhoaParts = chuanHoaTuKhoaTimKiem(tenTinhMoi);
 
                     const tinhMoiRecord = dataNew.filter(item => item.Cap === 'TINH').find(item => {
-                       return tuKhoaParts.every(part =>
+                        return tuKhoaParts.every(part =>
                             item.Ten.normalize('NFC').toLowerCase().includes(part.toLowerCase())
-                        )
+                        );
                     });
+
                     if (tinhMoiRecord) {
                         record.ThongTinSauSN = {
                             Ten: tenTinhMoi,
@@ -408,16 +459,89 @@
                             MaXa: ''
                         };
                     }
+                } else if (/không thực hiện sắp xếp là/i.test(thongTinCuoi)) {
+                    // Trường hợp KHÔNG sáp nhập nhưng có thể đổi tỉnh
+                    const tenXaCu = record.Ten.split(',')[0].trim();
+                    const tenTinhMoi = mergeRecord.Tinh;
+                    const tenDayDuMoi = `${tenXaCu}, ${tenTinhMoi}`;
+
+                    const tuKhoaParts = chuanHoaTuKhoaTimKiem(tenDayDuMoi);
+                    const xaMoiRecord = dataNew.find(item => {
+                        const tenDayDu = layTenVaMa(item, maMapNew).Ten.normalize('NFC').toLowerCase();
+                        return tuKhoaParts.every(part =>
+                            tenDayDu.includes(part.toLowerCase())
+                        );
+                    });
+
+                    if (xaMoiRecord) {
+                        record.ThongTinSauSN = {
+                            Ten: tenDayDuMoi,
+                            MaTinh: xaMoiRecord.CapTren,
+                            MaXa: xaMoiRecord.MaDVHC
+                        };
+                    }
                 }
             }
-            const ketQuaOld = dataOld
-                .filter(item => {
+
+            let filteredOld = dataOld.filter(item => {
+                const tuKhoaParts = chuanHoaTuKhoaTimKiemKhongLoaiBo(keyword);
+                const tenDayDu = layTenVaMa(item, maMapOld).Ten.normalize('NFC').toLowerCase();
+                return tuKhoaParts.every(part =>
+                    tenDayDu.includes(' '+part.toLowerCase())
+                );
+            });
+
+            if (filteredOld.length === 0) {
+                filteredOld = dataOld.filter(item => {
                     const tuKhoaParts = chuanHoaTuKhoaTimKiem(keyword);
                     const tenDayDu = layTenVaMa(item, maMapOld).Ten.normalize('NFC').toLowerCase();
                     return tuKhoaParts.every(part =>
-                        tenDayDu.includes(part.toLowerCase())
+                        tenDayDu.includes(' ' +part.toLowerCase())
                     );
-                })
+                });
+            }
+
+            if (filteredOld.length === 0) {
+                // Nếu không có kết quả, tìm với loại bỏ dấu
+                const keywordNoDiacritics = removeDiacritics(keyword);
+                const tuKhoaParts = chuanHoaTuKhoaTimKiemKhongLoaiBo(keywordNoDiacritics);
+
+                filteredOld = dataOld.filter(item => {
+                    const tenDayDu = removeDiacritics(layTenVaMa(item, maMapOld).Ten)
+                        .normalize('NFC').toLowerCase();
+                    return tuKhoaParts.every(part =>
+                        tenDayDu.includes(' ' +removeDiacritics(part).toLowerCase())
+                    );
+                });
+            }
+
+
+
+            if (filteredOld.length === 0) {
+                // Nếu không có kết quả, tìm với loại bỏ dấu
+                const keywordNoDiacritics = removeDiacritics(keyword);
+                const tuKhoaParts = chuanHoaTuKhoaTimKiem(keywordNoDiacritics);
+
+                filteredOld = dataOld.filter(item => {
+                    const tenDayDu = removeDiacritics(layTenVaMa(item, maMapOld).Ten)
+                        .normalize('NFC').toLowerCase();
+                    return tuKhoaParts.every(part =>
+                        tenDayDu.includes(' ' +removeDiacritics(part).toLowerCase())
+                    );
+                });
+            }
+
+
+
+
+
+
+
+
+
+
+
+            const ketQuaOld = filteredOld
                 .map(item => {
                     const ketQua = layTenVaMa(item, maMapOld);
                     const record = { ...ketQua, SauSN: false };
@@ -426,7 +550,6 @@
                     const tenSau = tenParts[tenParts.length - 1];
                     const tenSauProcessed = loaiBoTienToTen(tenSau);
                     const mergeRecord = timMergeRecord(tenSauProcessed, record);
-
                     record.ThongTinSN = timThongTinSN(record, mergeRecord);
                     if (mergeRecord && (record.MAXA || (record.MATINH && !record.MAHUYEN))) {
                         xuLyThongTinSauSN(record, mergeRecord);
@@ -434,14 +557,48 @@
                     return record;
                 });
 
-            const ketQuaNew = dataNew
-                .filter(item => {
+            let filteredNew = dataNew.filter(item => {
+                const tuKhoaParts = chuanHoaTuKhoaTimKiemKhongLoaiBo(keyword);
+                const tenDayDu = layTenVaMa(item, maMapNew).Ten.normalize('NFC').toLowerCase();
+                return tuKhoaParts.every(part =>
+                    tenDayDu.includes(' ' +part.toLowerCase())
+                );
+            });
+
+            if (filteredNew.length === 0) {
+                filteredNew = dataNew.filter(item => {
                     const tuKhoaParts = chuanHoaTuKhoaTimKiem(keyword);
                     const tenDayDu = layTenVaMa(item, maMapNew).Ten.normalize('NFC').toLowerCase();
                     return tuKhoaParts.every(part =>
-                        tenDayDu.includes(part.toLowerCase())
+                        tenDayDu.includes(' ' +part.toLowerCase())
                     );
-                })
+                });
+            }
+            if (filteredNew.length === 0) {
+                const keywordNoDiacritics = removeDiacritics(keyword);
+                const tuKhoaParts = chuanHoaTuKhoaTimKiemKhongLoaiBo(keywordNoDiacritics);
+
+                filteredNew = dataNew.filter(item => {
+                    const tenDayDu = removeDiacritics(layTenVaMa(item, maMapNew).Ten)
+                        .normalize('NFC').toLowerCase();
+                    return tuKhoaParts.every(part =>
+                        tenDayDu.includes(' ' +removeDiacritics(part).toLowerCase())
+                    );
+                });
+            }
+            if (filteredNew.length === 0) {
+                const keywordNoDiacritics = removeDiacritics(keyword);
+                const tuKhoaParts = chuanHoaTuKhoaTimKiem(keywordNoDiacritics);
+
+                filteredNew = dataNew.filter(item => {
+                    const tenDayDu = removeDiacritics(layTenVaMa(item, maMapNew).Ten)
+                        .normalize('NFC').toLowerCase();
+                    return tuKhoaParts.every(part =>
+                        tenDayDu.includes(' ' +removeDiacritics(part).toLowerCase())
+                    );
+                });
+            }
+            const ketQuaNew = filteredNew
                 .map(item => {
                     const ketQua = layTenVaMa(item, maMapNew);
                     const record = { ...ketQua, SauSN: true };
