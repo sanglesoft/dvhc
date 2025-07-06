@@ -1,14 +1,14 @@
 const CACHE_NAME = 'pwa-cache-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/bt.css',
-    '/bt.js',
-    '/db.js',
-    '/apple-touch-icon.png',
-    '/favicon-32x32.png',
-    '/favicon-16x16.png',
-    '/site.webmanifest'
+    './',
+    './index.html',
+    './bt.css',
+    './bt.js',
+    './db.js',
+    './apple-touch-icon.png',
+    './favicon-32x32.png',
+    './favicon-16x16.png',
+    './site.webmanifest'
 ];
 
 // Cài đặt Service Worker và cache sẵn file cần thiết
