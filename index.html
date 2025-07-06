@@ -87,7 +87,6 @@
             }, 500);
         };
 
-        //keywordInput.addEventListener('input', debounce(handleSearch, 600)); //tắt tự search
         keywordInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 handleSearch();
@@ -356,33 +355,6 @@
 
                 return mergeRecord;
             }
-
-            //function xuLyThongTinSauSN(record, mergeRecord) {
-            //    const thongTinCuoi = record.ThongTinSN[3] || '';
-            //    const match = thongTinCuoi.match(/có tên gọi là\s+(.+)$/i);
-            //    const tenXaMoi = match ? match[1].trim() : '';
-
-            //    if (tenXaMoi) {
-            //        const tenTinhMoi = mergeRecord.Tinh;
-            //        const tenDayDuMoi = `${tenXaMoi}, ${tenTinhMoi}`;
-
-            //        const tuKhoaParts = chuanHoaTuKhoaTimKiem(tenDayDuMoi);
-
-            //        const xaMoiRecord = dataNew.find(item => {
-            //            const tenDayDu = layTenVaMa(item, maMapNew).Ten.normalize('NFC').toLowerCase();
-            //            return tuKhoaParts.every(part =>
-            //                tenDayDu.includes(part.toLowerCase())
-            //            );
-            //        });
-            //        if (xaMoiRecord) {
-            //            record.ThongTinSauSN = {
-            //                Ten: tenDayDuMoi,
-            //                MaTinh: xaMoiRecord.CapTren,
-            //                MaXa: xaMoiRecord.MaDVHC
-            //            };
-            //        }
-            //    }
-            //}
             function xuLyThongTinSauSN(record, mergeRecord) {
                 const thongTinCuoi = record.ThongTinSN[3] || '';
                 const match = thongTinCuoi.match(/có tên gọi là\s+(.+)$/i);
@@ -419,8 +391,6 @@
                             item.Ten.normalize('NFC').toLowerCase().includes(part.toLowerCase())
                         )
                     });
-                    console.log(tuKhoaParts, tinhMoiRecord);
-
                     if (tinhMoiRecord) {
                         record.ThongTinSauSN = {
                             Ten: tenTinhMoi,
@@ -436,8 +406,6 @@
                     }
                 }
             }
-
-            
             const ketQuaOld = dataOld
                 .filter(item => {
                     const tuKhoaParts = chuanHoaTuKhoaTimKiem(keyword);
