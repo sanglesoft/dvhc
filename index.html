@@ -244,7 +244,7 @@
         }
 
         function loaiBoTienToTenCapDuoi(t) {
-            return t.replace(/^(Xã|Phường|Thị Trấn|Thị trấn|TT|Quận|Huyện|Thành phố)\s+/i, '').trim();
+            return t.replace(/^(Xã|Xa|Phuong|Phường|Thị Trấn|thi tran|Thị trấn|TT|Quận|quan|huyen|thanh pho|Huyện|Thành phố)\s+/i, '').trim();
         }
         function removeDiacritics(str) {
             return str.normalize("NFD")
@@ -359,11 +359,9 @@
                             );
                         }
 
-
                         thongTinSN.push(...thongTinPhu);
                     }
                 }
-
                 return thongTinSN;
             }
             function timMergeRecord(tenSauProcessed, record) {
@@ -515,8 +513,6 @@
                 });
             }
 
-
-
             if (filteredOld.length === 0) {
                 // Nếu không có kết quả, tìm với loại bỏ dấu
                 const keywordNoDiacritics = removeDiacritics(keyword);
@@ -530,16 +526,6 @@
                     );
                 });
             }
-
-
-
-
-
-
-
-
-
-
 
             const ketQuaOld = filteredOld
                 .map(item => {
